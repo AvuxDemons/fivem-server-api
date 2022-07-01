@@ -1,39 +1,38 @@
 # fivem-server-api
 JavaScript API for getting information about FiveM Server
 
-## Installation 
-**Install Package**: npm i fivem-server-api
+## Install
+```
+npm i fivem-server-api
+```
 
 ## Usage
-**Examples**
 
-Get Server Status [ Online / Offline ]
 ```js
 const FiveM = require("fivem-server-api") // Import the NPM Package.
 const server = new FiveM.Server('IP:PORT') // Set Server IP & Port.
- 
-server.getServerStatus().then(data => console.log(data)) // Get & Log the data!
-```
 
-Get Player Online Count
-```js
+/* Get Server Status [ Online / Offline ] */
+server.getServerStatus().then(data => console.log(data))
+
+/* Get Player Online Count */
 server.getPlayers().then(data => console.log(data))
-```
 
-Get Online Player List
-```js
+/* Get Online Player List */
 server.getPlayersAll().then(data => console.log(data))
-```
 
-Get Server Resources List
-```js
+/* Get Max Players In The Server */
+server.getMaxPlayers().then(data => console.log(data))
+
+/* Get Server Resources List */
 server.getResources().then(data => console.log(data))
 ```
 
+
 ## **ALL FUNCTION REQUESTS**
-- getServerStatus()
+- getServerStatus() - Server Status - (boolean)
 - getPlayers() - Number of players online - (number)
-- getPlayersAll() - List all players in an array - (string)
+- getPlayersAll() - List all players - (string/array)
 - getMaxPlayers() - Max players that are able to join the server - (number)
 - getResources() - Get resource names of all server resources - (string/array)
 - getTags() - Get all server tags - (string)

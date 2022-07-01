@@ -1,6 +1,6 @@
 {
   "name": "fivem-server-api",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "JavaScript API for getting information about FiveM Server",
   "main": "index.js",
   "scripts": {
