@@ -1,15 +1,15 @@
-# fivem-api
+# fivem-server-api
 JavaScript API for getting information about FiveM Server
 
 ## Installation 
-**Install Package**: npm i fivem-api
+**Install Package**: npm i fivem-server-api
 
 ## Usage
 **Examples**
 
 See if server is online (json)
 ```js
-const FiveM = require("fivem") // Import the npm package.
+const FiveM = require("fivem-server-api") // Import the npm package.
 const server = new FiveM.Server('IP:PORT') // Set the IP with port.
  
 server.getServerStatus().then(data => console.log(data)) // Get & log the data!
