@@ -1,6 +1,6 @@
 {
   "name": "fivem-server-api",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "JavaScript API for getting information about FiveM Server",
   "main": "index.js",
   "scripts": {
@@ -19,12 +19,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:AvuxDemons/fivem-api-js.git"
+    "url": "git@github.com:AvuxDemons/fivem-server-api.git"
   },
   "author": "AvuxDemons",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/AvuxDemons/fivem-api-js/issues"
+    "url": "https://github.com/AvuxDemons/fivem-server-api/issues"
   },
   "homepage": "https://avux.xyz",
   "dependencies": {
