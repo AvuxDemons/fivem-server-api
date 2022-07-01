@@ -1,0 +1,33 @@
+{
+  "name": "fivem-api",
+  "version": "1.0.0",
+  "description": "JavaScript API for getting information about FiveM Server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "fivem",
+    "api",
+    "fivem api",
+    "fivem server api",
+    "fivem server status",
+    "fivem player count",
+    "fivem player info",
+    "fivem api npm",
+    "fivem js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:AvuxDemons/fivem-api.git"
+  },
+  "author": "AvuxDemons",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AvuxDemons/fivem-api/issues"
+  },
+  "homepage": "https://avux.xyz",
+  "dependencies": {
+    "axios": "^0.21.1"
+  }
+}
