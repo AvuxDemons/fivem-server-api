@@ -4,6 +4,8 @@ const DEFAULT_OPTIONS = {
 	timeout: 5000
 };
 
+const errmsg = 'API Connection Failed';
+
 class Server {
 	constructor(ip, options) {
 		if (!ip) throw Error('Please provide an IP.');
@@ -13,7 +15,7 @@ class Server {
 	}
 
 	getPlayers() {
-		return new Promise((send, err) => {
+		return new Promise((send, error) => {
 			axios
 				.get(`http://${this.ip}/players.json`, { timeout: this.options.timeout })
 				.then(function (body) {
@@ -21,8 +23,7 @@ class Server {
 					send(players.length);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -36,8 +37,7 @@ class Server {
 					send(players);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -72,8 +72,7 @@ class Server {
 					send(resources);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -87,8 +86,7 @@ class Server {
 					send(onesync);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -102,8 +100,7 @@ class Server {
 					send(maxClients);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -117,8 +114,7 @@ class Server {
 					send(locale);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -132,8 +128,7 @@ class Server {
 					send(gamename);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -147,8 +142,7 @@ class Server {
 					send(enhancedHostSupport);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -162,8 +156,7 @@ class Server {
 					send(licenseKeyToken);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -177,8 +170,7 @@ class Server {
 					send(scriptHookAllowed);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -192,8 +184,7 @@ class Server {
 					send(tags);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
@@ -207,8 +198,7 @@ class Server {
 					send(server);
 				})
 				.catch(function (error) {
-					let err = 'Something went wrong. Please try again later';
-					send(err);
+					send(errmsg);
 				});
 		});
 	}
