@@ -26,9 +26,16 @@ const options = {
 // How to use the function
 server.getServerStatus().then(data => console.log(data)) // Get Server Status [ Online / Offline ]
 server.getPlayers().then(data => console.log(data))      // Get Player Online Count
-server.getPlayersAll().then(data => console.log(data))   // Get Online Player List
-server.getMaxPlayers().then(data => console.log(data))   // Get Max Players In The Server
-server.getResources().then(data => console.log(data))    // Get Server Resources List
+
+// Use More Than One Function
+Promise.all([server.getServerStatus(), server.getPlayers()])
+  .then(([serverStatus, players]) => {
+    console.log(serverStatus);
+    console.log(players);
+  })
+  .catch(error => {
+    console.error(error);
+  });
 ```
 
 ## **FUNCTION LIST**
