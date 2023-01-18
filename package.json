@@ -26,7 +26,7 @@
   "bugs": {
     "url": "https://github.com/AvuxDemons/fivem-server-api/issues"
   },
-  "homepage": "https://avux.xyz",
+  "homepage": "https://github.com/AvuxDemons/fivem-server-api",
   "dependencies": {
     "axios": "^0.21.1"
   }

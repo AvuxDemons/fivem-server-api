@@ -4,25 +4,25 @@ const DEFAULT_OPTIONS = {
 	timeout: 5000
 };
 
-const errmsg = 'API Connection Failed';
-
 class Server {
-	constructor(ip, options) {
-		if (!ip) throw Error('Please provide an IP.');
+	constructor(ip, port, errmsg, options) {
+		if (!ip || !port) throw Error('Please provide an IP & Port.');
 
 		this.ip = ip;
+		this.port = port;
+		this.errmsg = errmsg || 'API Connection Failed';
 		this.options = Object.assign(DEFAULT_OPTIONS, options);
 	}
 
 	getPlayers() {
-		return new Promise((send, error) => {
+		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/players.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/players.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let players = body.data;
 					send(players.length);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -31,12 +31,12 @@ class Server {
 	getPlayersAll() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/players.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/players.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let players = body.data;
 					send(players);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -45,20 +45,21 @@ class Server {
 	getServerStatus() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let server_status = {
 						online: true,
 					}
 					send(server_status);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					let server_status = {
 						online: false,
-						url: error.config.url,
-						method: error.config.method
+						url: err.config.url,
+						method: err.config.method
 					}
-					if (error.response == undefined) send(server_status)
+					if (err.response == undefined)
+						send(server_status)
 				});
 		});
 	}
@@ -66,12 +67,12 @@ class Server {
 	getResources() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let resources = body.data.resources;
 					send(resources);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -80,12 +81,12 @@ class Server {
 	getOnesync() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let onesync = body.data.vars.onesync_enabled;
 					send(onesync);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -94,12 +95,12 @@ class Server {
 	getMaxPlayers() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let maxClients = body.data.vars.sv_maxClients;
 					send(maxClients);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -108,12 +109,12 @@ class Server {
 	getLocale() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let locale = body.data.vars.locale;
 					send(locale);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -122,12 +123,12 @@ class Server {
 	getGamename() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let gamename = body.data.vars.gamename;
 					send(gamename);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -136,12 +137,12 @@ class Server {
 	getEnhancedHostSupport() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let enhancedHostSupport = body.data.vars.sv_enhancedHostSupport;
 					send(enhancedHostSupport);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -150,12 +151,12 @@ class Server {
 	getlicenseKeyToken() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let licenseKeyToken = body.data.vars.sv_licenseKeyToken;
 					send(licenseKeyToken);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -164,12 +165,12 @@ class Server {
 	getScriptHookAllowed() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let scriptHookAllowed = body.data.vars.sv_scriptHookAllowed;
 					send(scriptHookAllowed);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -178,12 +179,12 @@ class Server {
 	getTags() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let tags = body.data.vars.tags;
 					send(tags);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
@@ -192,17 +193,17 @@ class Server {
 	getServer() {
 		return new Promise((send, err) => {
 			axios
-				.get(`http://${this.ip}/info.json`, { timeout: this.options.timeout })
+				.get(`http://${this.ip}:${this.port}/info.json`, { timeout: this.options.timeout })
 				.then(function (body) {
 					let server = body.data;
 					send(server);
 				})
-				.catch(function (error) {
+				.catch(function (err) {
 					send(errmsg);
 				});
 		});
 	}
-	
+
 }
 
 module.exports.Server = Server;
