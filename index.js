@@ -10,7 +10,7 @@ class Server {
 
 		this.ip = ip;
 		this.port = port;
-		this.errmsg = errmsg || 'API Connection Failed';
+		this.errmsg = Object.assign("API Connection Failed", errmsg);
 		this.options = Object.assign(DEFAULT_OPTIONS, options);
 	}
 
