@@ -4,13 +4,17 @@ const DEFAULT_OPTIONS = {
 	timeout: 5000
 };
 
+const DEFAULT_ERROR = {
+	msg: "API Connection Failed"
+};
+
 class Server {
 	constructor(ip, port, errmsg, options) {
 		if (!ip || !port) throw Error('Please provide an IP & Port.');
 
 		this.ip = ip;
 		this.port = port;
-		this.errmsg = Object.assign("API Connection Failed", errmsg);
+		this.errmsg = Object.assign(DEFAULT_ERROR, errmsg);
 		this.options = Object.assign(DEFAULT_OPTIONS, options);
 	}
 
@@ -23,7 +27,7 @@ class Server {
 					send(players.length);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -37,7 +41,7 @@ class Server {
 					send(players);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -73,7 +77,7 @@ class Server {
 					send(resources);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -87,7 +91,7 @@ class Server {
 					send(onesync);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -101,7 +105,7 @@ class Server {
 					send(maxClients);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -115,7 +119,7 @@ class Server {
 					send(locale);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -129,7 +133,7 @@ class Server {
 					send(gamename);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -143,7 +147,7 @@ class Server {
 					send(enhancedHostSupport);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -157,7 +161,7 @@ class Server {
 					send(licenseKeyToken);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -171,7 +175,7 @@ class Server {
 					send(scriptHookAllowed);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -185,7 +189,7 @@ class Server {
 					send(tags);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
@@ -199,7 +203,7 @@ class Server {
 					send(server);
 				})
 				.catch(function (err) {
-					send(errmsg);
+					send(this.msg.errmsg);
 				});
 		});
 	}
