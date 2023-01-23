@@ -4,17 +4,13 @@ const DEFAULT_OPTIONS = {
 	timeout: 5000
 };
 
-const DEFAULT_ERROR = {
-	msg: "API Connection Failed"
-};
-
 class Server {
 	constructor(ip, port, errmsg, options) {
 		if (!ip || !port) throw Error('Please provide an IP & Port.');
 
 		this.ip = ip;
-		this.port = port;
-		this.errmsg = Object.assign(DEFAULT_ERROR, errmsg);
+		this.port = port;	
+		this.errmsg = errmsg || 'Error Occured';
 		this.options = Object.assign(DEFAULT_OPTIONS, options);
 	}
 
@@ -26,8 +22,8 @@ class Server {
 					let players = body.data;
 					send(players.length);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -40,8 +36,8 @@ class Server {
 					let players = body.data;
 					send(players);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -56,7 +52,7 @@ class Server {
 					}
 					send(server_status);
 				})
-				.catch(function (err) {
+				.catch((err) => {
 					let server_status = {
 						online: false,
 						url: err.config.url,
@@ -76,8 +72,8 @@ class Server {
 					let resources = body.data.resources;
 					send(resources);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -90,8 +86,8 @@ class Server {
 					let onesync = body.data.vars.onesync_enabled;
 					send(onesync);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -104,8 +100,8 @@ class Server {
 					let maxClients = body.data.vars.sv_maxClients;
 					send(maxClients);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -118,8 +114,8 @@ class Server {
 					let locale = body.data.vars.locale;
 					send(locale);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -132,8 +128,8 @@ class Server {
 					let gamename = body.data.vars.gamename;
 					send(gamename);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -146,8 +142,8 @@ class Server {
 					let enhancedHostSupport = body.data.vars.sv_enhancedHostSupport;
 					send(enhancedHostSupport);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -160,8 +156,8 @@ class Server {
 					let licenseKeyToken = body.data.vars.sv_licenseKeyToken;
 					send(licenseKeyToken);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -174,8 +170,8 @@ class Server {
 					let scriptHookAllowed = body.data.vars.sv_scriptHookAllowed;
 					send(scriptHookAllowed);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -188,8 +184,8 @@ class Server {
 					let tags = body.data.vars.tags;
 					send(tags);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
@@ -202,8 +198,8 @@ class Server {
 					let server = body.data;
 					send(server);
 				})
-				.catch(function (err) {
-					send(this.msg.errmsg);
+				.catch((err) => {
+					send(this.errmsg);
 				});
 		});
 	}
