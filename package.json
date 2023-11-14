@@ -1,6 +1,6 @@
 {
   "name": "fivem-server-api",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "JavaScript API for getting information about FiveM Server",
   "main": "index.js",
   "scripts": {
@@ -9,13 +9,17 @@
   "keywords": [
     "fivem",
     "api",
+    "fivem ip",
     "fivem api",
+    "fivem player api",
     "fivem server api",
     "fivem server status",
     "fivem player count",
     "fivem player info",
     "fivem api npm",
-    "fivem js"
+    "fivem js",
+    "cfxre",
+    "cfxre url"
   ],
   "repository": {
     "type": "git",
@@ -28,6 +32,6 @@
   },
   "homepage": "https://github.com/AvuxDemons/fivem-server-api",
   "dependencies": {
-    "axios": "^0.21.1"
+    "axios": "^0.21.4"
   }
 }
