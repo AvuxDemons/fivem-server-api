@@ -1,4 +1,4 @@
-import axios from "axios";
+const axios = require("axios");
 
 const DEFAULT_OPTIONS = {
     timeout: 30000,

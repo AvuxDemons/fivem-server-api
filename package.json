@@ -1,6 +1,6 @@
 {
   "name": "fivem-server-api",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "API Wrapper for getting information about FiveM Server",
   "main": "index.cjs",
   "module": "index.mjs",
