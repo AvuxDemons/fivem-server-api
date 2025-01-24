@@ -14,15 +14,19 @@ npm i fivem-server-api
 
 ```js
 // Import the Package ( Required )
+// Using require (CommonJS)
 const FiveM = require("fivem-server-api")
+
+// Or using import (ESM)
+import FiveM from "fivem-server-api"
 
 // Options ( Optional )
 const options = {
     timeout: 5000, // Default 5000ms / 5 seconds ( Milliseconds )
-    errmsg: 'Error Occured', // Default 'Error Occured' ( String )
+    errmsg: 'Error Occurred', // Default 'Error Occurred' ( String )
 }
 
-// Create New Object ( Require )
+// Create New Object ( Required )
 const server = new FiveM.Server('CFX.re URL / IP:PORT', options)
 /*  
     The first argument is CFX.re Server URL / Server IP Address ( REQUIRED )
@@ -32,7 +36,6 @@ const server = new FiveM.Server('CFX.re URL / IP:PORT', options)
       const server = new FiveM.Server('cfx.re/join/my59jq', options)     ||  Using CFX.re Url
       const server = new FiveM.Server('https://cfx.re/join/my59jq')      ||  Using CFX.re Url
 */
-
 
 // How to use the function
 
