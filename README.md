@@ -27,56 +27,41 @@ const options = {
 }
 
 // Create New Object ( Required )
-const server = new FiveM.Server('CFX.re URL / IP:PORT', options)
+const server = new FiveM('CFX.re URL / IP:PORT', options)
 /*  
     The first argument is CFX.re Server URL / Server IP Address ( REQUIRED )
     The second argument is Options                              ( Optional )
     Example : 
-      const server = new FiveM.Server('205.178.183.132:50120', options)  ||  Using IP:PORT
-      const server = new FiveM.Server('cfx.re/join/my59jq', options)     ||  Using CFX.re Url
-      const server = new FiveM.Server('https://cfx.re/join/my59jq')      ||  Using CFX.re Url
+      const server = new FiveM('205.178.183.132:50120', options)  ||  Using IP:PORT
+      const server = new FiveM('cfx.re/join/my59jq', options)     ||  Using CFX.re Url
+      const server = new FiveM('https://cfx.re/join/my59jq')      ||  Using CFX.re Url
+
+    Note* It will connecting to the server , so it need break atleast 5ms before you can call a method
 */
 
-// How to use the function
-
-// Promise ( Single Func )
-server.getServerStatus().then(data => console.log(data))
-server.getPlayers().then(data => console.log(data))
-
-// PromiseAll ( Multiple Func )
-Promise.all([server.getServerStatus(), server.getPlayers()]).then(([serverStatus, players]) => {
-    console.log(serverStatus);
-    console.log(players);
-}).catch(error => {
-    console.error(error);
-});
-
-// Async/Await ( Single Func )
-async function fetchServerStatus() {
-    const serverStatus = await server.getServerStatus();
-    console.log(serverStatus);
-}
-
-async function fetchPlayers() {
-    const players = await server.getPlayers();
-    console.log(players);
-}
-
-// Async/Await ( Multiple Func )
-async function fetchData() {
+// How to use the function ( Executing after 2s Connected to server )
+setTimeout(async () => {
     try {
-        const [serverStatus, players] = await Promise.all([server.getServerStatus(), server.getPlayers()]);
-        console.log(serverStatus);
-        console.log(players);
+        // Get server status
+        const serverStatus = await server.getServerStatus();
+        console.log("Server Status:", serverStatus);
+
+        // Get the number of players
+        const playerCount = await server.getPlayers();
+        console.log("Player Count:", playerCount);
+
+        // Get a list of all players
+        const allPlayers = await server.getPlayersAll();
+        console.log("All Players:", allPlayers);
     } catch (error) {
-        console.error(error);
+        console.error("Error:", error.message);
     }
-}
+}, 2000);
 ```
 
-## **FUNCTION LIST**
+## **METHOD LIST**
 
-| FUNCTION                 | DETAIL                                                        | RESULT         |
+| METHOD                   | DETAIL                                                        | RESPONSE       |
 | :----------------------: | :-----------------------------------------------------------: | :------------: |
 | getServer()              | Get the whole server object                                   | (string)       |
 | getServerStatus()        | Server Status                                                 | (boolean)      |

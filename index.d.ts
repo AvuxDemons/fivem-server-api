@@ -1,4 +1,4 @@
-declare module "Server" {
+declare module "fivem-server-api" {
     export interface ServerOptions {
         timeout?: number;
         errmsg?: string;
