@@ -6,7 +6,7 @@
 	"module": "dist/esm/index.js",
 	"types": "dist/index.d.ts",
 	"bin": {
-		"fivem-server-api": "./bin/cli.mjs"
+		"fivem-server-api": "./bin/cli.js"
 	},
 	"exports": {
 		".": {
