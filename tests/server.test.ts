@@ -775,3 +775,132 @@ describe("Server.multi()", () => {
 		expect(result.servers).toHaveLength(2);
 	});
 });
+
+const MOCK_DYNAMIC = {
+	clients: 47,
+	gametype: "Roleplay",
+	hostname: "^3KISAH NUSANTARA ROLEPLAY",
+	mapname: "San Andreas",
+	sv_maxclients: "1000",
+	iv: "1837349084",
+};
+
+describe("dynamic.json", () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	it("should get clients from dynamic.json", async () => {
+		mockedAxios.get.mockImplementation((url: string) => {
+			if ((url as string).includes("dynamic.json")) {
+				return Promise.resolve({ data: MOCK_DYNAMIC });
+			}
+			return Promise.resolve({ data: MOCK_INFO });
+		});
+		const server = new FiveM("1.2.3.4:30120");
+		const clients = await server.getClients();
+		expect(clients).toBe(47);
+	});
+
+	it("should fallback to players.json when dynamic.json fails", async () => {
+		mockedAxios.get.mockImplementation((url: string) => {
+			if ((url as string).includes("dynamic.json")) {
+				return Promise.reject(new Error("Forbidden"));
+			}
+			if ((url as string).includes("players.json")) {
+				return Promise.resolve({ data: MOCK_PLAYERS });
+			}
+			return Promise.resolve({ data: MOCK_INFO });
+		});
+		const server = new FiveM("1.2.3.4:30120");
+		const clients = await server.getClients();
+		expect(clients).toBe(3);
+	});
+
+	it("should get hostname from dynamic.json", async () => {
+		mockedAxios.get.mockImplementation((url: string) => {
+			if ((url as string).includes("dynamic.json")) {
+				return Promise.resolve({ data: MOCK_DYNAMIC });
+			}
+			return Promise.resolve({ data: MOCK_INFO });
+		});
+		const server = new FiveM("1.2.3.4:30120");
+		const hostname = await server.getHostname();
+		expect(hostname).toBe("^3KISAH NUSANTARA ROLEPLAY");
+	});
+
+	it("should fallback hostname to sv_projectName when dynamic.json fails", async () => {
+		mockedAxios.get.mockImplementation((url: string) => {
+			if ((url as string).includes("dynamic.json")) {
+				return Promise.reject(new Error("Forbidden"));
+			}
+			return Promise.resolve({ data: MOCK_INFO });
+		});
+		const server = new FiveM("1.2.3.4:30120");
+		const hostname = await server.getHostname();
+		expect(hostname).toBe("^1Test Server");
+	});
+
+	it("should get gametype from dynamic.json", async () => {
+		mockedAxios.get.mockImplementation((url: string) => {
+			if ((url as string).includes("dynamic.json")) {
+				return Promise.resolve({ data: MOCK_DYNAMIC });
+			}
+			return Promise.resolve({ data: MOCK_INFO });
+		});
+		const server = new FiveM("1.2.3.4:30120");
+		expect(await server.getGametype()).toBe("Roleplay");
+	});
+
+	it("should return empty gametype when dynamic.json fails", async () => {
+		mockedAxios.get.mockImplementation((url: string) => {
+			if ((url as string).includes("dynamic.json")) {
+				return Promise.reject(new Error("Forbidden"));
+			}
+			return Promise.resolve({ data: MOCK_INFO });
+		});
+		const server = new FiveM("1.2.3.4:30120");
+		expect(await server.getGametype()).toBe("");
+	});
+
+	it("should get mapname from dynamic.json", async () => {
+		mockedAxios.get.mockImplementation((url: string) => {
+			if ((url as string).includes("dynamic.json")) {
+				return Promise.resolve({ data: MOCK_DYNAMIC });
+			}
+			return Promise.resolve({ data: MOCK_INFO });
+		});
+		const server = new FiveM("1.2.3.4:30120");
+		expect(await server.getMapname()).toBe("San Andreas");
+	});
+
+	it("should get sv_maxclients from dynamic.json", async () => {
+		mockedAxios.get.mockImplementation((url: string) => {
+			if ((url as string).includes("dynamic.json")) {
+				return Promise.resolve({ data: MOCK_DYNAMIC });
+			}
+			return Promise.resolve({ data: MOCK_INFO });
+		});
+		const server = new FiveM("1.2.3.4:30120");
+		expect(await server.getSvMaxclients()).toBe(1000);
+	});
+
+	it("should cache dynamic.json within TTL", async () => {
+		mockedAxios.get.mockImplementation((url: string) => {
+			if ((url as string).includes("dynamic.json")) {
+				return Promise.resolve({ data: MOCK_DYNAMIC });
+			}
+			return Promise.resolve({ data: MOCK_INFO });
+		});
+		const server = new FiveM("1.2.3.4:30120", { cacheTtl: 60000 });
+
+		await server.getClients();
+		await server.getGametype();
+		await server.getMapname();
+
+		const dynamicCalls = mockedAxios.get.mock.calls.filter(
+			(c) => typeof c[0] === "string" && (c[0] as string).includes("dynamic.json"),
+		);
+		expect(dynamicCalls.length).toBe(1);
+	});
+});

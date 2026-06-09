@@ -23,6 +23,15 @@ export interface ServerInfo {
 	[key: string]: unknown;
 }
 
+export interface DynamicInfo {
+	clients: number;
+	gametype: string;
+	hostname: string;
+	mapname: string;
+	sv_maxclients: string;
+	iv: string;
+}
+
 export interface WatchHandle {
 	stop(): void;
 }

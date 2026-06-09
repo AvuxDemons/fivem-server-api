@@ -1,6 +1,6 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { FiveMError } from "./errors.js";
-import type { Player, ServerInfo, ServerOptions, WatchHandle, MultiServerConfig } from "./types.js";
+import type { Player, ServerInfo, ServerOptions, DynamicInfo, WatchHandle, MultiServerConfig } from "./types.js";
 
 const DEFAULT_OPTIONS: Required<ServerOptions> = {
 	timeout: 5000,
@@ -12,7 +12,7 @@ const DEFAULT_OPTIONS: Required<ServerOptions> = {
 };
 
 export { FiveMError } from "./errors.js";
-export type { Player, ServerInfo, ServerOptions, WatchHandle, MultiServerConfig } from "./types.js";
+export type { Player, ServerInfo, DynamicInfo, ServerOptions, WatchHandle, MultiServerConfig } from "./types.js";
 
 export default class Server {
 	#ip = "";
@@ -20,6 +20,7 @@ export default class Server {
 	#options: Required<ServerOptions>;
 	#logger: ((msg: string) => void) | null = null;
 	#infoCache: { data: ServerInfo; timestamp: number } | null = null;
+	#dynamicCache: { data: DynamicInfo; timestamp: number } | null = null;
 	#lastPlayerCount = 0;
 	#lastRequestTime = 0;
 
@@ -55,6 +56,7 @@ export default class Server {
 
 	clearCache(): void {
 		this.#infoCache = null;
+		this.#dynamicCache = null;
 		this.#log("Cache cleared");
 	}
 
@@ -193,6 +195,23 @@ export default class Server {
 				"Failed to fetch server info.",
 				{ method: "getInfo", url: `http://${this.#ip}/info.json`, cause: err },
 			);
+		}
+	}
+
+	async #getDynamic(): Promise<DynamicInfo | null> {
+		await this.#ready;
+
+		if (this.#dynamicCache && Date.now() - this.#dynamicCache.timestamp < this.#options.cacheTtl) {
+			return this.#dynamicCache.data;
+		}
+
+		try {
+			const response = await this.#fetch(`http://${this.#ip}/dynamic.json`);
+			this.#dynamicCache = { data: response.data as DynamicInfo, timestamp: Date.now() };
+			return this.#dynamicCache.data;
+		} catch {
+			this.#dynamicCache = null;
+			return null;
 		}
 	}
 
@@ -353,6 +372,41 @@ export default class Server {
 
 	async getBurstPower(): Promise<number> {
 		return Number((await this.#getInfo()).boostPower || 0);
+	}
+
+	async getClients(): Promise<number> {
+		const dynamic = await this.#getDynamic();
+		if (dynamic) return dynamic.clients;
+
+		this.#log("dynamic.json unavailable, falling back to players.json");
+		return this.getPlayers();
+	}
+
+	async getHostname(): Promise<string> {
+		const dynamic = await this.#getDynamic();
+		if (dynamic) return dynamic.hostname;
+
+		const info = await this.#getInfo();
+		return (this.#getField(info, "vars.sv_projectName") as string) || "";
+	}
+
+	async getGametype(): Promise<string> {
+		const dynamic = await this.#getDynamic();
+		if (dynamic) return dynamic.gametype;
+		return "";
+	}
+
+	async getMapname(): Promise<string> {
+		const dynamic = await this.#getDynamic();
+		if (dynamic) return dynamic.mapname;
+		return "";
+	}
+
+	async getSvMaxclients(): Promise<number> {
+		const dynamic = await this.#getDynamic();
+		if (dynamic) return Number(dynamic.sv_maxclients) || 0;
+
+		return Number((await this.#getInfo()).vars?.sv_maxClients || 0);
 	}
 
 	async getOwnerName(): Promise<string> {

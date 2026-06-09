@@ -134,6 +134,11 @@ const server = new FiveM("cfx.re/join/code", {
 | `getIcon()` | `Promise<string>` | Yes | Server icon (base64 data URI) |
 | `getUpvotePower()` | `Promise<number>` | Yes | Server upvote power |
 | `getBurstPower()` | `Promise<number>` | Yes | Server burst power (boost) |
+| `getClients()` | `Promise<number>` | Yes | Player count via lightweight `dynamic.json`. Falls back to `players.json` |
+| `getHostname()` | `Promise<string>` | Yes | Raw hostname from `dynamic.json`. Falls back to `sv_projectName` |
+| `getGametype()` | `Promise<string>` | Yes | Game type from `dynamic.json` (Roleplay, Freeroam, etc.) |
+| `getMapname()` | `Promise<string>` | Yes | Map name from `dynamic.json` (San Andreas, etc.) |
+| `getSvMaxclients()` | `Promise<number>` | Yes | Max clients from `dynamic.json`. Falls back to info.json |
 | `getOwnerName()` | `Promise<string>` | Yes | Owner display name |
 | `getOwnerProfile()` | `Promise<string>` | Yes | Owner forum profile URL |
 | `getOwnerAvatar()` | `Promise<string>` | Yes | Owner avatar URL |
@@ -211,6 +216,15 @@ interface ServerInfo {
   [key: string]: unknown;
 }
 
+interface DynamicInfo {
+  clients: number;
+  gametype: string;
+  hostname: string;
+  mapname: string;
+  sv_maxclients: string;
+  iv: string;
+}
+
 interface WatchHandle {
   stop(): void;
 }
@@ -225,7 +239,7 @@ All types are exported:
 
 ```ts
 import type {
-  Player, ServerInfo, ServerOptions,
+  Player, ServerInfo, DynamicInfo, ServerOptions,
   WatchHandle, MultiServerConfig,
 } from "fivem-server-api";
 ```
