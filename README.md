@@ -1,82 +1,265 @@
-# **fivem-server-api**
+# fivem-server-api
 
-Package for getting information about FiveM Server Using API
+Package for getting information about a FiveM server via its API endpoints.
 
 ## Installation
-
-Add `fivem-server-api` to your existing project.
 
 ```
 npm i fivem-server-api
 ```
 
-## Documentation
+## CLI
 
-```js
-// Import the Package ( Required )
-// Using require (CommonJS)
-const FiveM = require("fivem-server-api")
-
-// Or using import (ESM)
-import FiveM from "fivem-server-api"
-
-// Options ( Optional )
-const options = {
-    timeout: 5000, // Default 5000ms / 5 seconds ( Milliseconds )
-    errmsg: 'Error Occurred', // Default 'Error Occurred' ( String )
-}
-
-// Create New Object ( Required )
-const server = new FiveM('CFX.re URL / IP:PORT', options)
-/*  
-    The first argument is CFX.re Server URL / Server IP Address ( REQUIRED )
-    The second argument is Options                              ( Optional )
-    Example : 
-      const server = new FiveM('205.178.183.132:50120', options)  ||  Using IP:PORT
-      const server = new FiveM('cfx.re/join/my59jq', options)     ||  Using CFX.re Url
-      const server = new FiveM('https://cfx.re/join/my59jq')      ||  Using CFX.re Url
-
-    Note* It will connecting to the server , so it need break atleast 5ms before you can call a method
-*/
-
-// How to use the function ( Executing after 2s Connected to server )
-setTimeout(async () => {
-    try {
-        // Get server status
-        const serverStatus = await server.getServerStatus();
-        console.log("Server Status:", serverStatus);
-
-        // Get the number of players
-        const playerCount = await server.getPlayers();
-        console.log("Player Count:", playerCount);
-
-        // Get a list of all players
-        const allPlayers = await server.getPlayersAll();
-        console.log("All Players:", allPlayers);
-    } catch (error) {
-        console.error("Error:", error.message);
-    }
-}, 2000);
+```bash
+npx fivem-server-api cfx.re/join/my59jq
+npx fivem-server-api 1.2.3.4:30120 --json
+npx fivem-server-api cfx.re/join/code --timeout=15000
 ```
 
-## **METHOD LIST**
+## Usage
 
-| METHOD                   | DETAIL                                                        | RESPONSE       |
-| :----------------------: | :-----------------------------------------------------------: | :------------: |
-| getServer()              | Get the whole server object                                   | (string)       |
-| getServerStatus()        | Server Status                                                 | (boolean)      |
-| getServerName()          | Get server name                                               | (string)       |
-| getServerDesc()          | Get server description                                        | (string)       |
-| getPlayers()             | Number of players online                                      | (number)       |
-| getPlayersAll()          | List all players                                              | (string/array) |
-| getMaxPlayers()          | Max players that are able to join the server                  | (number)       |
-| getResources()           | Get resource names of all server resources                    | (string/array) |
-| getTags()                | Get all server tags                                           | (string)       |
-| getOnesync()             | See if the server has OneSync enabled                         | (boolean)      |
-| getLocale()              | The language of the server                                    | (string)       |
-| getGamename()            | Get the name of the server                                    | (string)       |
-| getSteamTicket()         | Is server require Steam ticket                                | (boolean)      |
-| getGameBuild()           | FiveM build version                                           | (boolean)      |
-| getEnhancedHostSupport() | ...                                                           | (boolean)      |
-| getlicenseKeyToken()     | The license key for the server                                | (string)       |
-| getScriptHookAllowed()   | See if the server supports external mod menus from the client | (boolean)      |
+```js
+// ESM
+import FiveM, { FiveMError } from "fivem-server-api";
+
+// CJS
+const FiveM = require("fivem-server-api");
+```
+
+### Accepted Input Formats
+
+| Format | Example |
+|--------|---------|
+| IP:PORT | `205.178.183.132:30120` |
+| IP only | `205.178.183.132` |
+| Domain:PORT | `myserver.com:30120` |
+| CFX.re short URL | `cfx.re/join/my59jq` |
+| CFX.re full URL | `https://cfx.re/join/my59jq` |
+| CFX.re code only | `my59jq` |
+
+### Basic Example
+
+```js
+import FiveM from "fivem-server-api";
+
+const server = new FiveM("cfx.re/join/my59jq", { timeout: 10000 });
+
+const online = await server.getServerStatus();
+
+if (online) {
+  const info = await server.getServer();
+  console.log("Name:", await server.getServerName());
+  console.log("Players:", await server.getPlayers());
+  console.log("Resources:", (await server.getResources()).length);
+}
+```
+
+### Error Handling
+
+All methods throw `FiveMError` on failure, except `getServerStatus()` which returns `false` when unreachable.
+
+```js
+import FiveM, { FiveMError } from "fivem-server-api";
+
+const server = new FiveM("1.2.3.4:30120");
+
+try {
+  const players = await server.getPlayersAll();
+  console.log(`Online: ${players.length}`);
+} catch (err) {
+  if (err instanceof FiveMError) {
+    console.error(`[${err.method}] ${err.message}`);
+  }
+}
+```
+
+`FiveMError` properties: `name`, `message`, `method`, `url`, `status`, `cause`.
+
+## Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `timeout` | `number` | `5000` | Request timeout in milliseconds |
+| `retries` | `number` | `0` | Number of retry attempts on failure |
+| `retryDelay` | `number` | `1000` | Delay between retries in milliseconds |
+| `cacheTtl` | `number` | `5000` | Cache duration for `info.json` in ms. Set `0` to disable |
+| `debug` | `boolean \| (msg: string) => void` | `false` | Enable logging. Pass `true` for console.log, or a custom logger function |
+| `minInterval` | `number` | `0` | Minimum delay between requests in ms (rate limiting) |
+
+```js
+const server = new FiveM("cfx.re/join/code", {
+  timeout: 10000,
+  retries: 2,
+  retryDelay: 1000,
+  cacheTtl: 0,
+  debug: (msg) => console.log("[DEBUG]", msg),
+  minInterval: 500,
+});
+```
+
+## Method List
+
+### Properties & Control
+
+| Method | Returns | Description |
+|:-------|:--------|:------------|
+| `ready()` | `Promise<void>` | Resolves when server IP is resolved (CFX.re). No-op for IP:PORT |
+| `clearCache()` | `void` | Clear cached `info.json` to force re-fetch |
+| `playerCount` | `number` | Sync getter — cached count from last `getPlayers()`/`getPlayersAll()`/`getServer()` |
+| `getIp()` | `string` | Resolved server IP:PORT (sync) |
+
+### Data Methods
+
+| Method | Returns | Throws | Description |
+|:-------|:--------|:-------|:------------|
+| `getServerStatus()` | `Promise<boolean>` | No | Server online status |
+| `getServer()` | `Promise<ServerInfo>` | Yes | Full server info from `info.json` |
+| `getServerName()` | `Promise<string>` | Yes | Server name (color codes stripped) |
+| `getServerDesc()` | `Promise<string>` | Yes | Server description |
+| `getPlayers()` | `Promise<number>` | Yes | Number of players online |
+| `getPlayersAll()` | `Promise<Player[]>` | Yes | All players with name, ping, identifiers |
+| `getPlayer(query)` | `Promise<Player \| null>` | Yes | Search by id (number), name substring, or identifier |
+| `getMaxPlayers()` | `Promise<number>` | Yes | Max player slots |
+| `getResources()` | `Promise<string[]>` | Yes | Resource names |
+| `getTags()` | `Promise<string>` | Yes | Server tags (comma-separated) |
+| `getOnesync()` | `Promise<boolean>` | Yes | OneSync enabled |
+| `getLocale()` | `Promise<string>` | Yes | Server locale (e.g. `id-ID`) |
+| `getGamename()` | `Promise<string>` | Yes | Game name (e.g. `gta5`) |
+| `getSteamTicket()` | `Promise<boolean>` | Yes | Steam ticket required |
+| `getGameBuild()` | `Promise<number>` | Yes | Enforced game build |
+| `getEnhancedHostSupport()` | `Promise<boolean>` | Yes | Enhanced host support |
+| `getLicenseKeyToken()` | `Promise<string>` | Yes | License key token |
+| `getScriptHookAllowed()` | `Promise<boolean>` | Yes | ScriptHook allowed |
+| `getEndpoint()` | `Promise<string \| null>` | Yes | Dynamic server endpoint |
+| `getIcon()` | `Promise<string>` | Yes | Server icon (base64 data URI) |
+| `getUpvotePower()` | `Promise<number>` | Yes | Server upvote power |
+| `getBurstPower()` | `Promise<number>` | Yes | Server burst power (boost) |
+| `getOwnerName()` | `Promise<string>` | Yes | Owner display name |
+| `getOwnerProfile()` | `Promise<string>` | Yes | Owner forum profile URL |
+| `getOwnerAvatar()` | `Promise<string>` | Yes | Owner avatar URL |
+
+### Player Search
+
+```js
+// By ID (number — exact match)
+const player = await server.getPlayer(42);
+
+// By name (string — case-insensitive substring)
+const player = await server.getPlayer("playername");
+
+// By identifier (string starting with license:/steam:/discord: — exact match)
+const player = await server.getPlayer("license:abc123def");
+```
+
+### Watch (Polling)
+
+```js
+const handle = server.watch(5000, async (s) => {
+  const count = await s.getPlayers();
+  console.log(`Players: ${count} (cached: ${s.playerCount})`);
+});
+
+// Later: handle.stop();
+```
+
+### Multi-Server
+
+```js
+const result = await FiveM.multi([
+  { cfxre: "1.2.3.4:30120" },
+  { cfxre: "cfx.re/join/code1" },
+  { cfxre: "cfx.re/join/code2", options: { timeout: 10000 } },
+]);
+
+console.log("All servers:", result.servers.length);
+
+const statuses = await result.getAllStatus();
+// Map<string, boolean> — IP → online/offline
+
+const counts = await result.getAllPlayers();
+// Map<string, number> — IP → player count (-1 if failed)
+
+const online = await result.getOnlineServers();
+// Server[] — only online servers
+```
+
+## TypeScript Types
+
+```ts
+interface ServerOptions {
+  timeout?: number;
+  retries?: number;
+  retryDelay?: number;
+  cacheTtl?: number;
+  debug?: boolean | ((message: string) => void);
+  minInterval?: number;
+}
+
+interface Player {
+  id: number;
+  identifiers: string[];
+  name: string;
+  ping: number;
+}
+
+interface ServerInfo {
+  server: string;
+  icon: string;
+  resources: string[];
+  players: Player[];
+  vars: Record<string, string>;
+  [key: string]: unknown;
+}
+
+interface WatchHandle {
+  stop(): void;
+}
+
+interface MultiServerConfig {
+  cfxre: string;
+  options?: ServerOptions;
+}
+```
+
+All types are exported:
+
+```ts
+import type {
+  Player, ServerInfo, ServerOptions,
+  WatchHandle, MultiServerConfig,
+} from "fivem-server-api";
+```
+
+## Migrating from v1.x
+
+| v1.x | v2.x |
+|------|------|
+| Returns `errmsg` on error | Throws `FiveMError` — use `try/catch` |
+| Needs `setTimeout` before use | No delay — internal ready state |
+| `console.log` on connect | Silent by default (use `debug` option) |
+| `getServerStatus()` → object | `getServerStatus()` → `boolean` |
+| No caching | `info.json` cached with configurable TTL |
+| Duplicate `index.cjs` / `index.mjs` | Single TypeScript source |
+| — | `ready()`, `clearCache()`, `playerCount`, `getPlayer()` |
+| — | `watch()`, `Server.multi()`, CLI tool |
+
+```js
+// v1.x
+const FiveM = require("fivem-server-api");
+const server = new FiveM("1.2.3.4:30120", { timeout: 5000, errmsg: "Error" });
+setTimeout(async () => {
+  const status = await server.getServerStatus();
+  if (status.online) { /* ... */ }
+}, 2000);
+
+// v2.x
+import FiveM from "fivem-server-api";
+const server = new FiveM("1.2.3.4:30120", { timeout: 5000 });
+await server.ready(); // optional — methods auto-wait
+const online = await server.getServerStatus();
+if (online) { /* ... */ }
+```
+
+## License
+
+ISC

@@ -1,0 +1,23 @@
+node_modules
+dist
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Env
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage
+
+# Temp
+*.tgz
+test_live.*
