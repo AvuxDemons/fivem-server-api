@@ -1,6 +1,6 @@
 {
 	"name": "fivem-server-api",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"description": "API Wrapper for getting information about FiveM Server",
 	"main": "dist/cjs/index.js",
 	"module": "dist/esm/index.js",
@@ -61,7 +61,8 @@
 	},
 	"homepage": "https://github.com/AvuxDemons/fivem-server-api",
 	"dependencies": {
-		"axios": "^1.17.0"
+		"axios": "^1.17.0",
+		"protobufjs": "^8.6.2"
 	},
 	"devDependencies": {
 		"@types/node": "^24.10.2",

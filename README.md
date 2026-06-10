@@ -188,6 +188,69 @@ const online = await result.getOnlineServers();
 // Server[] — only online servers
 ```
 
+### Server Search
+
+Search the global FiveM server list from Cfx.re. Fetches all ~35k servers and filters locally.
+
+```js
+import { searchServers, getAllServers, getServerByEndpoint, getServersByLocale } from "fivem-server-api";
+
+// Get all servers (default 30s timeout)
+const all = await getAllServers();
+console.log(`Total: ${all.length} servers`);
+
+// Filter by locale
+const idServers = await getServersByLocale("id-ID");
+console.log(`Indonesian servers: ${idServers.length}`);
+
+// Search with multiple filters
+const results = await searchServers(
+  { query: "roleplay", gametype: "roleplay", locale: "id-ID" },
+  10,    // limit (default: unlimited)
+  30000, // timeout ms (default: 30000)
+);
+
+// Find a specific server by endpoint ID
+const server = await getServerByEndpoint("3lamjz");
+if (server) {
+  console.log(server.Data.hostname);
+  console.log(`${server.Data.clients}/${server.Data.svMaxclients} players`);
+}
+```
+
+#### SearchFilter
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `query` | `string` | Searches across hostname, sv_projectName, tags, gametype, mapname (case-insensitive partial) |
+| `locale` | `string` | Exact locale match (e.g. `"en-US"`, `"id-ID"`) |
+| `hostname` | `string` | Partial match on server hostname and sv_projectName |
+| `gametype` | `string` | Partial match on game type (e.g. `"roleplay"`, `"freeroam"`) |
+| `mapname` | `string` | Partial match on map name (e.g. `"San Andreas"`) |
+| `tag` | `string` | Partial match on server tags |
+
+#### SearchResult
+
+```ts
+interface SearchResult {
+  EndPoint: string;        // Unique server ID (e.g. "3lamjz")
+  Data: {
+    hostname: string;      // Server display name
+    clients: number;       // Current players
+    svMaxclients: number;  // Max player slots
+    gametype: string;      // e.g. "Roleplay", "Freeroam"
+    mapname: string;       // e.g. "San Andreas"
+    vars: Record<string, string>;  // locale, tags, sv_projectName, etc.
+    resources: string[];
+    players: SearchPlayer[];
+    connectEndPoints: string[];     // IP:PORT addresses
+    upvotePower: number;
+    burstPower: number;
+    // ... and more
+  };
+}
+```
+
 ## TypeScript Types
 
 ```ts
@@ -241,6 +304,7 @@ All types are exported:
 import type {
   Player, ServerInfo, DynamicInfo, ServerOptions,
   WatchHandle, MultiServerConfig,
+  SearchFilter, SearchResult, SearchPlayer, SearchServerData,
 } from "fivem-server-api";
 ```
 

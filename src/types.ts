@@ -40,3 +40,10 @@ export interface MultiServerConfig {
 	cfxre: string;
 	options?: ServerOptions;
 }
+
+export type {
+	SearchFilter,
+	SearchPlayer,
+	SearchServerData,
+	SearchResult,
+} from "./search.js";

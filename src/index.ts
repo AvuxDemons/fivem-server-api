@@ -12,6 +12,18 @@ const DEFAULT_OPTIONS: Required<ServerOptions> = {
 };
 
 export { FiveMError } from "./errors.js";
+export {
+	searchServers,
+	getAllServers,
+	getServerByEndpoint,
+	getServersByLocale,
+} from "./search.js";
+export type {
+	SearchFilter,
+	SearchPlayer,
+	SearchServerData,
+	SearchResult,
+} from "./search.js";
 export type { Player, ServerInfo, DynamicInfo, ServerOptions, WatchHandle, MultiServerConfig } from "./types.js";
 
 export default class Server {
