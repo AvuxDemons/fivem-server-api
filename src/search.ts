@@ -2,6 +2,7 @@ import protobuf from "protobufjs";
 import { FiveMError } from "./errors.js";
 
 const CFX_SERVERS_URL = "https://frontend.cfx-services.net/api/servers/streamRedir/";
+const CFX_ICON_BASE = "https://frontend.cfx-services.net/api/servers/icon";
 
 const PROTO_SCHEMA = `
 syntax = "proto3";
@@ -86,7 +87,12 @@ function getServerType(): protobuf.Type {
 	return ServerType;
 }
 
-async function fetchAllServers(timeout = 30000, debug?: (msg: string) => void): Promise<SearchResult[]> {
+async function fetchAllServers(
+	timeout = 30000,
+	debug?: (msg: string) => void,
+	maxResults?: number,
+	predicate?: (s: SearchResult) => boolean,
+): Promise<SearchResult[]> {
 	const controller = new AbortController();
 	let timerId: ReturnType<typeof setTimeout> | undefined;
 
@@ -131,6 +137,7 @@ async function fetchAllServers(timeout = 30000, debug?: (msg: string) => void): 
 		const decode = getServerType();
 		const array = new Uint8Array(buf);
 		let pos = 0;
+		const hasLimit = maxResults && maxResults > 0;
 
 		while (pos + 4 <= array.length) {
 			const frameLength = (array[pos] | (array[pos + 1] << 8) | (array[pos + 2] << 16) | (array[pos + 3] << 24)) >>> 0;
@@ -143,7 +150,13 @@ async function fetchAllServers(timeout = 30000, debug?: (msg: string) => void): 
 
 			try {
 				const decoded = decode.decode(frame) as unknown as SearchResult;
-				servers.push(decoded);
+				if (!predicate || predicate(decoded)) {
+					servers.push(decoded);
+					if (hasLimit && servers.length >= maxResults) {
+						debug?.(`Early stop: ${servers.length} matching results`);
+						break;
+					}
+				}
 			} catch {
 				// skip malformed frames
 			}
@@ -163,68 +176,76 @@ async function fetchAllServers(timeout = 30000, debug?: (msg: string) => void): 
 	}
 }
 
+function buildPredicate(filter: SearchFilter): (s: SearchResult) => boolean {
+	const conditions: ((s: SearchResult) => boolean)[] = [];
+
+	if (filter.query) {
+		const target = filter.query.toLowerCase();
+		conditions.push((s) => {
+			const d = s.Data;
+			return (
+				(d?.hostname || "").toLowerCase().includes(target) ||
+				(d?.vars?.sv_projectName || "").toLowerCase().includes(target) ||
+				(d?.vars?.tags || "").toLowerCase().includes(target) ||
+				(d?.gametype || "").toLowerCase().includes(target) ||
+				(d?.mapname || "").toLowerCase().includes(target)
+			);
+		});
+	}
+	if (filter.locale) {
+		const target = filter.locale.toLowerCase();
+		conditions.push((s) => (s.Data?.vars?.locale || "").toLowerCase() === target);
+	}
+	if (filter.hostname) {
+		const target = filter.hostname.toLowerCase();
+		conditions.push((s) => {
+			const name = s.Data?.hostname || "";
+			return name.toLowerCase().includes(target) ||
+				(s.Data?.vars?.sv_projectName || "").toLowerCase().includes(target);
+		});
+	}
+	if (filter.gametype) {
+		const target = filter.gametype.toLowerCase();
+		conditions.push((s) => (s.Data?.gametype || "").toLowerCase().includes(target));
+	}
+	if (filter.mapname) {
+		const target = filter.mapname.toLowerCase();
+		conditions.push((s) => (s.Data?.mapname || "").toLowerCase().includes(target));
+	}
+	if (filter.tag) {
+		const target = filter.tag.toLowerCase();
+		conditions.push((s) => (s.Data?.vars?.tags || "").toLowerCase().includes(target));
+	}
+
+	return (s) => conditions.every((c) => c(s));
+}
+
 /**
  * Search FiveM servers from the Cfx.re global server list.
+ * Stops decoding early when enough matching results are found.
  *
- * @param filter - Filter criteria (locale, hostname, gametype, mapname, tag)
- * @param limit - Maximum number of results to return (0 = unlimited)
+ * @param filter - Filter criteria (locale, hostname, gametype, mapname, tag, query)
+ * @param limit - Maximum number of results to return (default: 20, pass 0 for unlimited)
  * @param timeout - Request timeout in ms (default: 30000)
+ * @param offset - Number of results to skip before collecting (for pagination)
  * @returns Matching servers (resolved to plain objects)
  */
 export async function searchServers(
 	filter?: SearchFilter,
-	limit?: number,
+	limit = 20,
 	timeout?: number,
+	offset?: number,
 ): Promise<SearchResult[]> {
-	const servers = await fetchAllServers(timeout);
+	const predicate = filter ? buildPredicate(filter) : undefined;
+	const needed = limit > 0 ? (offset || 0) + limit : 0;
 
-	let results = servers;
+	const servers = await fetchAllServers(timeout, undefined, needed || undefined, predicate);
 
-	if (filter) {
-		if (filter.query) {
-			const target = filter.query.toLowerCase();
-			results = results.filter((s) => {
-				const d = s.Data;
-				return (
-					(d?.hostname || "").toLowerCase().includes(target) ||
-					(d?.vars?.sv_projectName || "").toLowerCase().includes(target) ||
-					(d?.vars?.tags || "").toLowerCase().includes(target) ||
-					(d?.gametype || "").toLowerCase().includes(target) ||
-					(d?.mapname || "").toLowerCase().includes(target)
-				);
-			});
-		}
-		if (filter.locale) {
-			const target = filter.locale.toLowerCase();
-			results = results.filter((s) => s.Data?.vars?.locale?.toLowerCase() === target);
-		}
-		if (filter.hostname) {
-			const target = filter.hostname.toLowerCase();
-			results = results.filter((s) => {
-				const name = s.Data?.hostname || "";
-				return name.toLowerCase().includes(target) ||
-					(s.Data?.vars?.sv_projectName || "").toLowerCase().includes(target);
-			});
-		}
-		if (filter.gametype) {
-			const target = filter.gametype.toLowerCase();
-			results = results.filter((s) => (s.Data?.gametype || "").toLowerCase().includes(target));
-		}
-		if (filter.mapname) {
-			const target = filter.mapname.toLowerCase();
-			results = results.filter((s) => (s.Data?.mapname || "").toLowerCase().includes(target));
-		}
-		if (filter.tag) {
-			const target = filter.tag.toLowerCase();
-			results = results.filter((s) => (s.Data?.vars?.tags || "").toLowerCase().includes(target));
-		}
+	if (offset && offset > 0) {
+		return servers.slice(offset);
 	}
 
-	if (limit && limit > 0) {
-		results = results.slice(0, limit);
-	}
-
-	return results;
+	return servers;
 }
 
 /**
@@ -257,11 +278,44 @@ export async function getAllServers(timeout?: number): Promise<SearchResult[]> {
  *
  * @param locale - The locale code to match
  * @param timeout - Request timeout in ms
- * @returns Servers matching the given locale
+ * @param offset - Number of results to skip (for pagination)
+ * @returns Servers matching the given locale (default: first 20)
  */
 export async function getServersByLocale(
 	locale: string,
 	timeout?: number,
+	offset?: number,
 ): Promise<SearchResult[]> {
-	return searchServers({ locale }, undefined, timeout);
+	return searchServers({ locale }, 20, timeout, offset);
+}
+
+/**
+ * Build the icon URL for a server from the Cfx.re CDN.
+ * Returns null when iconVersion is 0 (no custom icon set).
+ *
+ * @param endpointOrResult - Either a server endpoint ID (string) or a full SearchResult object
+ * @param iconVersion - The icon version number (only needed if first arg is a string)
+ * @returns The full icon image URL (PNG) or null if no icon available
+ *
+ * @example
+ * const url = getIconUrl(result);   // => "https://..." or null
+ * const url = getIconUrl("3lamjz", 5); // => "https://..."
+ */
+export function getIconUrl(endpointOrResult: string | SearchResult, iconVersion?: number): string | null {
+	const ver = typeof endpointOrResult === "string"
+		? (iconVersion ?? 0)
+		: (endpointOrResult.Data?.iconVersion ?? 0);
+	if (!ver) return null;
+	const ep = typeof endpointOrResult === "string" ? endpointOrResult : endpointOrResult.EndPoint;
+	return `${CFX_ICON_BASE}/${ep}/${ver}.png`;
+}
+
+/**
+ * Check if a server is private (IP hidden by Cfx.re).
+ * Private servers have "private-placeholder.cfx.re" in connectEndPoints.
+ */
+export function isPrivateServer(result: SearchResult): boolean {
+	const eps = result.Data?.connectEndPoints;
+	if (!eps || eps.length === 0) return false;
+	return eps.some((ep) => ep.includes("private-placeholder.cfx.re"));
 }

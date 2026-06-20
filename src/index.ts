@@ -17,6 +17,8 @@ export {
 	getAllServers,
 	getServerByEndpoint,
 	getServersByLocale,
+	getIconUrl,
+	isPrivateServer,
 } from "./search.js";
 export type {
 	SearchFilter,
