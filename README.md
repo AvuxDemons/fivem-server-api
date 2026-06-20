@@ -190,24 +190,34 @@ const online = await result.getOnlineServers();
 
 ### Server Search
 
-Search the global FiveM server list from Cfx.re. Fetches all ~35k servers and filters locally.
+Search the global FiveM server list from Cfx.re. By default returns 20 results — pass `0` for unlimited. Stops decoding early when enough matches are found.
 
 ```js
-import { searchServers, getAllServers, getServerByEndpoint, getServersByLocale } from "fivem-server-api";
+import {
+  searchServers, getAllServers, getServerByEndpoint, getServersByLocale,
+  getIconUrl, isPrivateServer,
+} from "fivem-server-api";
 
 // Get all servers (default 30s timeout)
 const all = await getAllServers();
 console.log(`Total: ${all.length} servers`);
 
-// Filter by locale
+// Filter by locale (default 20 results)
 const idServers = await getServersByLocale("id-ID");
 console.log(`Indonesian servers: ${idServers.length}`);
 
-// Search with multiple filters
-const results = await searchServers(
+// Search with multiple filters + pagination
+const page1 = await searchServers(
   { query: "roleplay", gametype: "roleplay", locale: "id-ID" },
-  10,    // limit (default: unlimited)
+  10,    // limit (default: 20, pass 0 for unlimited)
   30000, // timeout ms (default: 30000)
+  0,     // offset (default: 0)
+);
+const page2 = await searchServers(
+  { query: "roleplay" },
+  10,     // 10 per page
+  30000,
+  10,     // skip first 10
 );
 
 // Find a specific server by endpoint ID
@@ -215,6 +225,15 @@ const server = await getServerByEndpoint("3lamjz");
 if (server) {
   console.log(server.Data.hostname);
   console.log(`${server.Data.clients}/${server.Data.svMaxclients} players`);
+
+  // Icon URL — null if iconVersion is 0 (no custom icon)
+  const iconUrl = getIconUrl(server);
+  // => "https://frontend.cfx-services.net/api/servers/icon/3lamjz/5.png"
+
+  // Check if server is private
+  if (isPrivateServer(server)) {
+    console.log("Private server — IP hidden");
+  }
 }
 ```
 
@@ -240,14 +259,34 @@ interface SearchResult {
     svMaxclients: number;  // Max player slots
     gametype: string;      // e.g. "Roleplay", "Freeroam"
     mapname: string;       // e.g. "San Andreas"
+    iconVersion: number;   // Icon version (0 = no custom icon)
     vars: Record<string, string>;  // locale, tags, sv_projectName, etc.
     resources: string[];
     players: SearchPlayer[];
-    connectEndPoints: string[];     // IP:PORT addresses
+    connectEndPoints: string[];     // IP:PORT or "private-placeholder.cfx.re" for private servers
     upvotePower: number;
     burstPower: number;
     // ... and more
   };
+}
+```
+
+#### Icon & Private Helpers
+
+```ts
+import { getIconUrl, isPrivateServer } from "fivem-server-api";
+
+// getIconUrl(server) => string | null
+// Returns Cfx.re CDN icon URL, or null if iconVersion is 0
+const icon = getIconUrl(result);
+if (icon) {
+  // https://frontend.cfx-services.net/api/servers/icon/oax6pvv/2006463867.png
+}
+
+// isPrivateServer(server) => boolean
+// True if connectEndPoints contains "private-placeholder.cfx.re"
+if (isPrivateServer(result)) {
+  console.log("This server hides its IP");
 }
 ```
 
@@ -305,6 +344,15 @@ import type {
   Player, ServerInfo, DynamicInfo, ServerOptions,
   WatchHandle, MultiServerConfig,
   SearchFilter, SearchResult, SearchPlayer, SearchServerData,
+} from "fivem-server-api";
+```
+
+All utility functions are exported:
+
+```ts
+import {
+  searchServers, getAllServers, getServerByEndpoint, getServersByLocale,
+  getIconUrl, isPrivateServer,
 } from "fivem-server-api";
 ```
 
