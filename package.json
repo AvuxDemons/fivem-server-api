@@ -1,7 +1,7 @@
 {
 	"name": "fivem-server-api",
 	"version": "1.6.1",
-	"description": "TypeScript-ready FiveM server API — query player counts, server info, search 35k+ servers globally, detect private servers, get icons, with CLI, pagination, caching & retry support",
+	"description": "Query FiveM server info, player list, player count, resources, tags, locale, OneSync, game build, and more from any server IP or CFX.re URL. Also includes global server search with filtering, pagination, icon URL helper, private server detection, caching, retries, CLI tool, and full TypeScript support.",
 	"main": "dist/cjs/index.js",
 	"module": "dist/esm/index.js",
 	"types": "dist/index.d.ts",
